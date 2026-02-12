@@ -1,16 +1,17 @@
-package banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models;
+package banking.trade_vault.ETL_pipeline.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record Beneficiary(
+public record BeneficiaryEntity(
         String beneficiaryId,
         String accountNumber,
         String code,
         String bank,
         String beneficiaryName,
-        String lastPaymentAmount,
-        String lastPaymentDate,
+        BigDecimal lastPaymentAmount,
+        LocalDate lastPaymentDate,
         String cellNo,
         String emailAddress,
         String name,
@@ -18,5 +19,6 @@ public record Beneficiary(
         String referenceName,
         String categoryId,
         String profileId,
-        Boolean fasterPaymentAllowed
+        Boolean fasterPaymentAllowed,
+        LocalDateTime ingestedAt
 ) {}

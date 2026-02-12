@@ -13,8 +13,8 @@ public interface PrivateBankingInformationService {
     @GetExchange("/accounts/{accountId}/balance")
     JsonNode getAccountInformation(@PathVariable String accountId);
 
-    @GetExchange("/profiles/{profileId}/accounts/{accountId}/beneficiaries")
-    JsonNode getBeneficiaries(@PathVariable String profileId, @PathVariable String accountId);
+    @GetExchange("/accounts/beneficiaries")
+    JsonNode getBeneficiaries();
 
     @GetExchange("/accounts/{accountId}/transactions?includePending=true")
     JsonNode getTransactions(@PathVariable String accountId);

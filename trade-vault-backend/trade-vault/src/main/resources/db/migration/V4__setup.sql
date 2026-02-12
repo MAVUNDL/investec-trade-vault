@@ -1,0 +1,1 @@
+ALTER TABLE account ADD ingested_at TIMESTAMP;

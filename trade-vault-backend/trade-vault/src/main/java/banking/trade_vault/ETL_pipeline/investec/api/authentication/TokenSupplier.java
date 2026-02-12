@@ -30,18 +30,12 @@ public class TokenSupplier {
             return cachedToken;
         }
 
-        System.out.println("DEBUG: Fetching new Investec Token for ClientID: " + clientId);
-
         // 2. Prepare Basic Auth (StandardCharsets.UTF_8 is safer)
         String authString = clientId + ":" + clientSecret;
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8));
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "client_credentials");
-        // Note: Some Investec environments require a scope, e.g., 'accounts'
-        // formData.add("scope", "accounts");
-
-        // 3. Execute Request with Error Logging
         OAuthTokenResponse response = authClient.post()
                 .uri("/identity/v2/oauth2/token")
                 .header(HttpHeaders.AUTHORIZATION, basicAuth)
@@ -66,7 +60,6 @@ public class TokenSupplier {
         this.cachedToken = response.access_token();
         this.tokenExpiry = Instant.now().plusSeconds(response.expires_in() - 60);
 
-        System.out.println("✅ Token retrieved successfully.");
         return cachedToken;
     }
 
