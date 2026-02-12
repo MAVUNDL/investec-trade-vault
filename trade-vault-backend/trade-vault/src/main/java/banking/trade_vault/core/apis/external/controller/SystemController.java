@@ -1,5 +1,7 @@
 package banking.trade_vault.core.apis.external.controller;
 
+import banking.trade_vault.core.apis.external.system.cib.models.Shipment;
+import banking.trade_vault.core.apis.external.system.cib.service.ClientInvestmentBankingInformationService;
 import banking.trade_vault.core.apis.external.system.pb.models.Account;
 import banking.trade_vault.core.apis.external.system.pb.models.AccountInformation;
 import banking.trade_vault.core.apis.external.system.pb.models.Beneficiary;
@@ -19,10 +21,12 @@ import java.util.List;
 @RequestMapping("/banking")
 public class SystemController {
     private final PrivateBankingInformationService pbService;
+    private final ClientInvestmentBankingInformationService cibService;
     private final ObjectMapper mapper =  new ObjectMapper();
 
-    public SystemController(PrivateBankingInformationService pbService) {
+    public SystemController(PrivateBankingInformationService pbService, ClientInvestmentBankingInformationService cibService) {
         this.pbService = pbService;
+        this.cibService = cibService;
     }
 
     @GetMapping("/accounts")
@@ -85,6 +89,22 @@ public class SystemController {
 
         try {
             return mapper.convertValue(transactionsNode, new TypeReference<List<Transaction>>() {});
+        } catch (IllegalArgumentException e) {
+            return List.of();
+        }
+    }
+
+    @GetMapping("/shipments")
+    public List<Shipment> getShipments(){
+        tools.jackson.databind.JsonNode jsonNode = cibService.getShipments();
+        JsonNode shipmentsNode = jsonNode.path("data");
+        System.out.println("shipmentsNode: " + jsonNode);
+        if (shipmentsNode.isMissingNode() || !shipmentsNode.isArray()) {
+            return List.of();
+        }
+
+        try {
+            return mapper.convertValue(shipmentsNode, new TypeReference<List<Shipment>>() {});
         } catch (IllegalArgumentException e) {
             return List.of();
         }

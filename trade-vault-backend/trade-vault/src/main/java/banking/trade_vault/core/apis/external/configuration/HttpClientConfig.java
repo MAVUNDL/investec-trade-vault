@@ -35,6 +35,7 @@ public class HttpClientConfig {
                             .requestInterceptor((request, body, execution) -> {
                                 String token = tokenSupplier.getAccessToken(System.getenv("CIB_CLIENT_ID"), System.getenv("CIB_SECRET"), System.getenv("CIB_API_KEY"));
                                 request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+                                request.getHeaders().add("User-Agent", "PostmanRuntime/7.26.8");
                                 return execution.execute(request, body);
                             }));
         };
