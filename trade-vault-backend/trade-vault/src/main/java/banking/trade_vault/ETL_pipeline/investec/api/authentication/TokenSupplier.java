@@ -1,4 +1,4 @@
-package banking.trade_vault.core.apis.external.authentication;
+package banking.trade_vault.ETL_pipeline.investec.api.authentication;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;

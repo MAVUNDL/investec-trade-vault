@@ -1,12 +1,12 @@
-package banking.trade_vault.core.apis.external.controller;
+package banking.trade_vault.ETL_pipeline.investec.api.controller;
 
-import banking.trade_vault.core.apis.external.system.cib.models.Shipment;
-import banking.trade_vault.core.apis.external.system.cib.service.ClientInvestmentBankingInformationService;
-import banking.trade_vault.core.apis.external.system.pb.models.Account;
-import banking.trade_vault.core.apis.external.system.pb.models.AccountInformation;
-import banking.trade_vault.core.apis.external.system.pb.models.Beneficiary;
-import banking.trade_vault.core.apis.external.system.pb.models.Transaction;
-import banking.trade_vault.core.apis.external.system.pb.service.PrivateBankingInformationService;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.cib.models.Shipment;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.cib.service.ClientInvestmentBankingInformationService;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.Account;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.AccountInformation;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.Beneficiary;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.Transaction;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.service.PrivateBankingInformationService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,12 +19,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/banking")
-public class SystemController {
+public class ApiController {
     private final PrivateBankingInformationService pbService;
     private final ClientInvestmentBankingInformationService cibService;
     private final ObjectMapper mapper =  new ObjectMapper();
 
-    public SystemController(PrivateBankingInformationService pbService, ClientInvestmentBankingInformationService cibService) {
+    public ApiController(PrivateBankingInformationService pbService, ClientInvestmentBankingInformationService cibService) {
         this.pbService = pbService;
         this.cibService = cibService;
     }

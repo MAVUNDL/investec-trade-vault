@@ -1,4 +1,4 @@
-package banking.trade_vault.core.apis.external.authentication;
+package banking.trade_vault.ETL_pipeline.investec.api.authentication;
 
 public record OAuthTokenResponse(
         String access_token,

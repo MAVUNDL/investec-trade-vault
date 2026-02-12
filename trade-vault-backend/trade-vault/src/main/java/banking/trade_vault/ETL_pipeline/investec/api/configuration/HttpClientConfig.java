@@ -1,9 +1,9 @@
-package banking.trade_vault.core.apis.external.configuration;
+package banking.trade_vault.ETL_pipeline.investec.api.configuration;
 
 
-import banking.trade_vault.core.apis.external.authentication.TokenSupplier;
-import banking.trade_vault.core.apis.external.system.cib.service.ClientInvestmentBankingInformationService;
-import banking.trade_vault.core.apis.external.system.pb.service.PrivateBankingInformationService;
+import banking.trade_vault.ETL_pipeline.investec.api.authentication.TokenSupplier;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.cib.service.ClientInvestmentBankingInformationService;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.service.PrivateBankingInformationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;

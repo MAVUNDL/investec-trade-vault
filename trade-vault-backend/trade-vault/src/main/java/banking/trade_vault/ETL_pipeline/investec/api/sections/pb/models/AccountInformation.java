@@ -1,4 +1,4 @@
-package banking.trade_vault.core.apis.external.system.pb.models;
+package banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
