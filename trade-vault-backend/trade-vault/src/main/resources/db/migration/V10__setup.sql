@@ -1,1 +1,0 @@
-ALTER TABLE shipments ADD ingested_at timestamp;

@@ -217,21 +217,6 @@ public class PipelineConfig {
                             :uuid,
                             :ingestedAt
                         )
-                        ON CONFLICT (account_id)
-                        DO UPDATE SET
-                            type = EXCLUDED.type,
-                            transaction_type = EXCLUDED.transaction_type,
-                            status = EXCLUDED.status,
-                            description = EXCLUDED.description,
-                            card_number = EXCLUDED.card_number,
-                            posting_date = EXCLUDED.posting_date,
-                            value_date = EXCLUDED.value_date,
-                            action_date = EXCLUDED.action_date,
-                            transaction_date = EXCLUDED.transaction_date,
-                            amount = EXCLUDED.amount,
-                            running_balance = EXCLUDED.running_balance,
-                            uuid = EXCLUDED.uuid,
-                            ingested_at = EXCLUDED.ingested_at;
                         """))
                 .faultTolerant()
                 .skip(DuplicateKeyException.class)
