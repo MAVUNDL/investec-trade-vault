@@ -1,7 +1,6 @@
 package banking.trade_vault.ETL_pipeline.investec.api.authentication;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -11,31 +10,40 @@ import org.springframework.web.client.RestClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class TokenSupplier {
     private final RestClient authClient;
+    private final Map<String, TokenCacheEntry> tokenCache = new ConcurrentHashMap<>();
 
-    //  (in production, use a proper cache with expiry)
-    private String cachedToken;
-    private Instant tokenExpiry = Instant.MIN;
+    record TokenCacheEntry(String token, Instant expiry) {}
 
     public TokenSupplier(RestClient.Builder builder) {
-        // Create a dedicated client just for the Auth endpoint
         this.authClient = builder.baseUrl("https://openapisandbox.investec.com").build();
     }
 
-    public String getAccessToken( String clientId, String clientSecret, String apiKey) {
-        if (cachedToken != null && Instant.now().isBefore(tokenExpiry)) {
-            return cachedToken;
+    public String getAccessToken(String clientId, String clientSecret, String apiKey) {
+        // 1. Check Cache for THIS SPECIFIC Client ID
+        TokenCacheEntry entry = tokenCache.get(clientId);
+
+        if (entry != null && Instant.now().isBefore(entry.expiry)) {
+            // System.out.println("✅ Using Cached Token for Client: " + clientId.substring(0, 5) + "...");
+            return entry.token();
         }
 
-        // 2. Prepare Basic Auth (StandardCharsets.UTF_8 is safer)
+        // 2. Cache Miss? Fetch New Token
+        System.out.println("🔄 Fetching NEW Token for Client: " + clientId.substring(0, 5) + "...");
+
         String authString = clientId + ":" + clientSecret;
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8));
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "client_credentials");
+        // Optional: Add scope if your CIB needs it
+        // formData.add("scope", "accounts balances transactions trade");
+
         OAuthTokenResponse response = authClient.post()
                 .uri("/identity/v2/oauth2/token")
                 .header(HttpHeaders.AUTHORIZATION, basicAuth)
@@ -43,24 +51,16 @@ public class TokenSupplier {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(formData)
                 .retrieve()
-                // CAPTURE THE ERROR BODY
-                .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
-                    String body = new String(resp.getBody().readAllBytes());
-                    System.err.println("❌ INVESTEC AUTH FAILED: " + resp.getStatusCode());
-                    System.err.println("❌ BODY: " + body);
-                    throw new RuntimeException("Investec Auth Failed: " + body);
-                })
                 .body(OAuthTokenResponse.class);
 
         if (response == null || response.access_token() == null) {
             throw new IllegalStateException("Received null token from Investec");
         }
 
-        // 4. Update State
-        this.cachedToken = response.access_token();
-        this.tokenExpiry = Instant.now().plusSeconds(response.expires_in() - 60);
+        // 3. Store in Map (Keyed by Client ID)
+        Instant expiry = Instant.now().plusSeconds(response.expires_in() - 60);
+        tokenCache.put(clientId, new TokenCacheEntry(response.access_token(), expiry));
 
-        return cachedToken;
+        return response.access_token();
     }
-
 }

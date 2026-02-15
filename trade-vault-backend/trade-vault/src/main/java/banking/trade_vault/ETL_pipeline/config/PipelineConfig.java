@@ -1,9 +1,7 @@
 package banking.trade_vault.ETL_pipeline.config;
 
-import banking.trade_vault.ETL_pipeline.entities.AccountEntity;
-import banking.trade_vault.ETL_pipeline.entities.AccountInformationEntity;
-import banking.trade_vault.ETL_pipeline.entities.BeneficiaryEntity;
-import banking.trade_vault.ETL_pipeline.entities.TransactionEntity;
+import banking.trade_vault.ETL_pipeline.entities.*;
+import banking.trade_vault.ETL_pipeline.investec.api.sections.cib.models.Shipment;
 import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.Account;
 import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.AccountInformation;
 import banking.trade_vault.ETL_pipeline.investec.api.sections.pb.models.Beneficiary;
@@ -241,6 +239,100 @@ public class PipelineConfig {
                 .build();
     }
 
+    @Bean
+    public Step ingestShipmentsStep(JobRepository jobRepository, ItemReader<Shipment> reader, ItemProcessor<Shipment, ShipmentEntity> processor) {
+        return new StepBuilder("shipment-ingestion-step", jobRepository)
+                .<Shipment, ShipmentEntity>chunk(100)
+                .reader(reader)
+                .processor(processor)
+                .writer(JdbcBatchItemWriter("""
+                        INSERT INTO shipments (
+                            shipment_number,
+                            indent_number,
+                            ifb_reference,
+                            customer_name,
+                            buyer_full_name,
+                            supplier_name,
+                            port_of_load,
+                            port_of_discharge,
+                            delivery_address,
+                            ship_on_board,
+                            eta,
+                            delivery_date,
+                            mv_start_date,
+                            mv_end_date,
+                            currency_code,
+                            order_value,
+                            shipped_value,
+                            paid_amount,
+                            unit_price,
+                            estimated_landed_cost,
+                            incoterm,
+                            status,
+                            movement_type,
+                            shipment_mode,
+                            vessel_name,
+                            container_number,
+                            container_count,
+                            container_type,
+                            load_type,
+                            pallets,
+                            cartons,
+                            item_reference,
+                            quantity,
+                            description,
+                            delivery_contact,
+                            delivery_month,
+                            delivery_year,
+                            ingested_at
+                        )
+                        VALUES (
+                            :shipment_number,
+                            :indent_number,
+                            :ifb_reference,
+                            :customer_name,
+                            :buyer_full_name,
+                            :supplier_name,
+                            :port_of_load,
+                            :port_of_discharge,
+                            :delivery_address,
+                            :ship_on_board,
+                            :eta,
+                            :delivery_date,
+                            :mv_start_date,
+                            :mv_end_date,
+                            :currency_code,
+                            :order_value,
+                            :shipped_value,
+                            :paid_amount,
+                            :unit_price,
+                            :estimated_landed_cost,
+                            :incoterm,
+                            :status,
+                            :movement_type,
+                            :shipment_mode,
+                            :vessel_name,
+                            :container_number,
+                            :container_count,
+                            :container_type,
+                            :load_type,
+                            :pallets,
+                            :cartons,
+                            :item_reference,
+                            :quantity,
+                            :description,
+                            :delivery_contact,
+                            :delivery_month,
+                            :delivery_year,
+                            :ingested_at
+                        )
+                        """))
+                .faultTolerant()
+                .skip(DuplicateKeyException.class)
+                .skipLimit(Integer.MAX_VALUE)
+                .build();
+    }
+
 
     private <T> JdbcBatchItemWriter<T> JdbcBatchItemWriter(String sql) {
         return new JdbcBatchItemWriterBuilder<T>()
@@ -251,13 +343,14 @@ public class PipelineConfig {
     }
 
     @Bean
-    public Job ingestionPipelineJob(JobRepository jobRepository, Step ingestAccountsStep, Step ingestAccountInfoStep, Step ingestTransactionsStep,Step ingestBeneficiariesStep) {
+    public Job ingestionPipelineJob(JobRepository jobRepository, Step ingestAccountsStep, Step ingestAccountInfoStep, Step ingestTransactionsStep,Step ingestBeneficiariesStep, Step ingestShipmentsStep) {
         return new JobBuilder("ingestion-pipeline-job", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(ingestAccountsStep)
                 .next(ingestAccountInfoStep)
                 .next(ingestTransactionsStep)
                 .next(ingestBeneficiariesStep)
+                .next(ingestShipmentsStep)
                 .build();
     }
 }
